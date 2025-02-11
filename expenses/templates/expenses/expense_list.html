@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Your Expenses - Expense Manager{% endblock %}
+{% block nav_links %}
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'dashboard' %}" style="border-radius: 5px;">Dashboard</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-add' %}" style="border-radius: 5px;">Add Expense</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-summary' %}" style="border-radius: 5px;">Summary</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'export_csv' %}" style="border-radius: 5px;">Export CSV</a>
+  </li>
+  <li class="nav-item">
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="nav-link btn btn-danger text-white px-3" style="border-radius: 5px; border: none;">Logout</button>
+    </form>
+  </li>
+{% endblock %}
+{% block content %}
+<h2>Your Expenses</h2>
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label for="category" class="form-label">Category</label>
+    <select name="category" id="category" class="form-select">
+      <option value="">All</option>
+      <option value="Food">Food</option>
+      <option value="Travel">Travel</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Bills">Bills</option>
+      <option value="Miscellaneous">Miscellaneous</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label for="start_date" class="form-label">Start Date</label>
+    <input type="date" name="start_date" id="start_date" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label for="end_date" class="form-label">End Date</label>
+    <input type="date" name="end_date" id="end_date" class="form-control">
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+
+<table class="table table-striped">
+  <thead class="table-primary">
+    <tr>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Category</th>
+      <th>Amount</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for expense in expenses %}
+    <tr>
+      <td>{{ expense.date }}</td>
+      <td>{{ expense.description }}</td>
+      <td>{{ expense.category }}</td>
+      <td>${{ expense.amount }}</td>
+      <td>
+        <a href="{% url 'expense-edit' expense.pk %}" class="btn btn-sm btn-warning">Edit</a>
+        <a href="{% url 'expense-delete' expense.pk %}" class="btn btn-sm btn-danger">Delete</a>
+      </td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="5" class="text-center">No expenses found.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

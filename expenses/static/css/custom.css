@@ -1,0 +1,22 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.card {
+    margin-bottom: 1rem;
+}
+
+.table {
+    background-color: #ffffff;
+}
+
+.btn {
+    transition: background-color 0.3s ease;
+}
+.btn:hover {
+    opacity: 0.9;
+}

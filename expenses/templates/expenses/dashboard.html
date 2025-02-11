@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Expense Manager{% endblock %}
+{% block nav_links %}
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-add' %}" style="border-radius: 5px;">Add Expense</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-summary' %}" style="border-radius: 5px;">Summary</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-list' %}" style="border-radius: 5px;">Expenses</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'export_csv' %}" style="border-radius: 5px;">Export CSV</a>
+  </li>
+  <li class="nav-item">
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="nav-link btn btn-danger text-white px-3" style="border-radius: 5px; border: none;">Logout</button>
+    </form>
+  </li>
+{% endblock %}
+{% block content %}
+<div class="row">
+  <div class="col-12 mb-4">
+    <h2>Dashboard</h2>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Expenses by Category</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="pieChart" style="max-height: 400px;"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow mb-4">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">Monthly Expenses</h5>
+      </div>
+      <div class="card-body">
+        <canvas id="barChart" style="max-height: 400px;"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const categoryData = {{ category_data|safe }};
+    const monthlyData = {{ monthly_data|safe }};
+
+    if (categoryData.length > 0) {
+      const pieLabels = categoryData.map(item => item.category);
+      const pieValues = categoryData.map(item => item.total);
+      new Chart(document.getElementById('pieChart').getContext('2d'), {
+        type: 'pie',
+        data: {
+          labels: pieLabels,
+          datasets: [{
+            data: pieValues,
+            backgroundColor: ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8']
+          }]
+        },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    } else {
+      document.getElementById('pieChart').parentElement.innerHTML = "<p class='text-center text-muted'>No data available</p>";
+    }
+
+    if (monthlyData.length > 0) {
+      const barLabels = monthlyData.map(item => 'Month ' + item.month);
+      const barValues = monthlyData.map(item => item.total);
+      new Chart(document.getElementById('barChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: barLabels,
+          datasets: [{
+            label: 'Expenses',
+            data: barValues,
+            backgroundColor: '#007bff'
+          }]
+        },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    } else {
+      document.getElementById('barChart').parentElement.innerHTML = "<p class='text-center text-muted'>No data available</p>";
+    }
+  });
+</script>
+{% endblock %}

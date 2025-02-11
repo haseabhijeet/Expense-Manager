@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}{% if object %}Edit Expense{% else %}Add Expense{% endif %} - Expense Manager{% endblock %}
+{% block nav_links %}
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'dashboard' %}" style="border-radius: 5px;">Dashboard</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-summary' %}" style="border-radius: 5px;">Summary</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-list' %}" style="border-radius: 5px;">Expenses</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'export_csv' %}" style="border-radius: 5px;">Export CSV</a>
+  </li>
+  <li class="nav-item">
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="nav-link btn btn-danger text-white px-3" style="border-radius: 5px; border: none;">Logout</button>
+    </form>
+  </li>
+{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card shadow">
+      <div class="card-header bg-success text-white">
+        <h4 class="mb-0">{% if object %}Edit Expense{% else %}Add Expense{% endif %}</h4>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.as_p }}
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success">{% if object %}Update{% else %}Add{% endif %}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

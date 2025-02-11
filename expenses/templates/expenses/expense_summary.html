@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Expense Summary - Expense Manager{% endblock %}
+{% block nav_links %}
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'dashboard' %}" style="border-radius: 5px;">Dashboard</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-add' %}" style="border-radius: 5px;">Add Expense</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'expense-list' %}" style="border-radius: 5px;">Expenses</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link text-white px-3" href="{% url 'export_csv' %}" style="border-radius: 5px;">Export CSV</a>
+  </li>
+  <li class="nav-item">
+    <form method="post" action="{% url 'logout' %}" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="nav-link btn btn-danger text-white px-3" style="border-radius: 5px; border: none;">Logout</button>
+    </form>
+  </li>
+{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h2>Expense Summary</h2>
+</div>
+
+<form method="get" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <label for="category" class="form-label">Category</label>
+    <select name="category" id="category" class="form-select">
+      <option value="">All</option>
+      <option value="Food">Food</option>
+      <option value="Travel">Travel</option>
+      <option value="Shopping">Shopping</option>
+      <option value="Bills">Bills</option>
+      <option value="Miscellaneous">Miscellaneous</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <label for="start_date" class="form-label">Start Date</label>
+    <input type="date" name="start_date" id="start_date" class="form-control">
+  </div>
+  <div class="col-md-3">
+    <label for="end_date" class="form-label">End Date</label>
+    <input type="date" name="end_date" id="end_date" class="form-control">
+  </div>
+  <div class="col-md-3 d-flex align-items-end">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+
+<h3>Daily Summary</h3>
+<table class="table table-bordered">
+  <thead class="table-light">
+    <tr>
+      <th>Category</th>
+      <th>Date</th>
+      <th>Total Expense</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in daily_summary %}
+    <tr>
+      <td>{{ item.category }}</td>
+      <td>{{ item.date }}</td>
+      <td>${{ item.total|floatformat:2 }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3" class="text-center">No daily summary data available.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h3>Monthly Summary</h3>
+<table class="table table-bordered">
+  <thead class="table-light">
+    <tr>
+      <th>Category</th>
+      <th>Month</th>
+      <th>Total Expense</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in monthly_summary %}
+    <tr>
+      <td>{{ item.category }}</td>
+      <td>{{ item.month }}</td>
+      <td>${{ item.total|floatformat:2 }}</td>
+    </tr>
+    {% empty %}
+    <tr>
+      <td colspan="3" class="text-center">No monthly summary data available.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
