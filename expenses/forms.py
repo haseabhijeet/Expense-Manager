@@ -1,10 +1,14 @@
 from django import forms
+import datetime
 from .models import Expense
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 class ExpenseForm(forms.ModelForm):
-    date = forms.DateField(widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}))
+    date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+        help_text="Select a date up to today."
+    )
     
     class Meta:
         model = Expense
@@ -14,6 +18,12 @@ class ExpenseForm(forms.ModelForm):
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'category': forms.Select(attrs={'class': 'form-select'}),
         }
+    
+    def clean_date(self):
+        date = self.cleaned_data.get('date')
+        if date > datetime.date.today():
+            raise forms.ValidationError("Expense date cannot be in the future.")
+        return date
 
 class SignUpForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=True,

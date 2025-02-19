@@ -38,6 +38,11 @@ class ExpenseListView(LoginRequiredMixin, ListView):
             queryset = queryset.filter(date__lte=end_date)
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'expenses'
+        return context
+
 class ExpenseCreateView(LoginRequiredMixin, CreateView):
     model = Expense
     form_class = ExpenseForm
@@ -49,6 +54,11 @@ class ExpenseCreateView(LoginRequiredMixin, CreateView):
         response = super().form_valid(form)
         messages.success(self.request, "Expense added successfully!")
         return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'expense-add'
+        return context
 
 class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
     model = Expense
@@ -64,6 +74,11 @@ class ExpenseUpdateView(LoginRequiredMixin, UpdateView):
         messages.success(self.request, "Expense updated successfully!")
         return response
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'expense-edit'
+        return context
+
 class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
     model = Expense
     template_name = 'expenses/expense_confirm_delete.html'
@@ -76,6 +91,11 @@ class ExpenseDeleteView(LoginRequiredMixin, DeleteView):
         response = super().delete(request, *args, **kwargs)
         messages.success(request, "Expense deleted successfully!")
         return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_page'] = 'expense-delete'
+        return context
 
 @login_required
 def dashboard(request):
@@ -91,12 +111,19 @@ def dashboard(request):
 
     current_month = datetime.date.today().month
     current_month_total = expenses.filter(date__month=current_month).aggregate(total=Sum('amount'))['total'] or 0
-    if current_month_total > settings.BUDGET_LIMIT:
-        messages.warning(request, f"Warning: Your expenses for this month (${current_month_total:.2f}) exceed your budget limit of ${settings.BUDGET_LIMIT}!")
+    budget_limit = settings.BUDGET_LIMIT
+    budget_usage = (current_month_total / budget_limit) * 100 if budget_limit else 0
+    if budget_usage > 100:
+        budget_usage = 100
+        messages.warning(request, f"Warning: Your expenses for this month (${current_month_total:.2f}) exceed your budget limit of ${budget_limit}!")
 
     context = {
         'category_data': json.dumps(category_data),
         'monthly_data': json.dumps(monthly_data),
+        'current_month_total': current_month_total,
+        'budget_usage': round(budget_usage, 2),
+        'settings': settings,
+        'current_page': 'dashboard',
     }
     return render(request, 'expenses/dashboard.html', context)
 
@@ -110,7 +137,7 @@ def signup(request):
             return redirect('dashboard')
     else:
         form = SignUpForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'registration/signup.html', {'form': form, 'current_page': 'signup'})
 
 @login_required
 def expense_summary(request):
@@ -131,6 +158,7 @@ def expense_summary(request):
     context = {
         'daily_summary': daily_summary,
         'monthly_summary': monthly_summary,
+        'current_page': 'summary',
     }
     return render(request, 'expenses/expense_summary.html', context)
 
